@@ -53,7 +53,7 @@ const DonatePage = () => {
     }),
     onSubmit: async (values, { resetForm }) => {
       try {
-        await axios.post("http://localhost:5001/donations", values);
+        const res = await axios.post("https://iskcon-backend.onrender.com/donations", values);
         alert(`🙏 Thank you for your donation of ₹${values.amount}! Hare Krishna!`);
         resetForm();
       } catch (err) {
