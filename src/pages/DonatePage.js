@@ -9,16 +9,13 @@ import {
   FormControlLabel,
   Checkbox,
   Divider,
-  Alert,
 } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import upiqr from "../assets/upiqr.jpg"; // ✅ Ensure this image exists
+import axios from "axios";
+import upiqr from "../assets/upiqr.jpg";
 
 const DonatePage = () => {
-  const [showAlert, setShowAlert] = useState(false);
-  const [donationAmount, setDonationAmount] = useState("");
-
   const formik = useFormik({
     initialValues: {
       firstName: "",
@@ -54,10 +51,14 @@ const DonatePage = () => {
         .required("Donation amount is required")
         .min(1, "Amount must be greater than 0"),
     }),
-    onSubmit: (values) => {
-      setDonationAmount(values.amount);
-      setShowAlert(true);
-      alert(`🙏 Thank you for donating ₹${values.amount}! Hare Krishna!`);
+    onSubmit: async (values, { resetForm }) => {
+      try {
+        await axios.post("http://localhost:5001/donations", values);
+        alert(`🙏 Thank you for your donation of ₹${values.amount}! Hare Krishna!`);
+        resetForm();
+      } catch (err) {
+        alert("Failed to record donation: " + err.message);
+      }
     },
   });
 
@@ -205,16 +206,10 @@ const DonatePage = () => {
           </Grid>
         </form>
 
-        {showAlert && (
-          <Alert severity="success" sx={{ mt: 3 }}>
-            🎉 Thank you for donating ₹{donationAmount}! Hare Krishna 🙏
-          </Alert>
-        )}
-
-        {/* ✅ QR Code Section */}
+        {/* ✅ QR Code section */}
         <Box sx={{ mt: 5, textAlign: "center" }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            Or Scan this QR to Donate
+            Scan this QR to Donate
           </Typography>
           <img
             src={upiqr}
@@ -227,7 +222,7 @@ const DonatePage = () => {
             }}
           />
           <Typography variant="body2" sx={{ mt: 2 }} color="text.secondary">
-            <strong>UPI ID:</strong> 9032641581@hdfc
+            <strong>UPI ID:</strong> 9032641581@hdfcbank
           </Typography>
         </Box>
       </Box>

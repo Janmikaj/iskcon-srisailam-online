@@ -13,31 +13,19 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 const SECRET_KEY = process.env.JWT_SECRET || "harekrishna_secret_key";
+const MONGO_URI =
+  process.env.MONGO_URI || "mongodb://127.0.0.1:27017/iskcon_srisailam_db";
 
 // ==========================
 // 📦 MONGODB CONNECTION
 // ==========================
 mongoose
-  .connect(process.env.MONGO_URI, { dbName: "iskcon_srisailam_db" })
+  .connect(MONGO_URI, { dbName: "iskcon_srisailam_db" })
   .then(() => console.log("✅ Connected to MongoDB (iskcon_srisailam_db)"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// 🧹 Drop old index if exists
-mongoose.connection.once("open", async () => {
-  try {
-    const indexes = await mongoose.connection.db.collection("users").indexes();
-    const hasUsernameIndex = indexes.some((idx) => idx.name === "username_1");
-    if (hasUsernameIndex) {
-      await mongoose.connection.db.collection("users").dropIndex("username_1");
-      console.log("🧹 Dropped old index: username_1");
-    }
-  } catch (err) {
-    console.error("⚠️ Failed to drop old index:", err.message);
-  }
-});
-
 // ==========================
-// 🧩 MONGOOSE SCHEMAS
+// 🧩 SCHEMAS
 // ==========================
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
@@ -53,8 +41,21 @@ const eventSchema = new mongoose.Schema({
   description: { type: String, default: "" },
 });
 
+// 💰 DONATION SCHEMA
+const donationSchema = new mongoose.Schema({
+  firstName: String,
+  lastName: String,
+  phone: String,
+  email: String,
+  wants80G: Boolean,
+  pan: String,
+  amount: Number,
+  date: { type: Date, default: Date.now },
+});
+
 const User = mongoose.model("User", userSchema);
 const Event = mongoose.model("Event", eventSchema);
+const Donation = mongoose.model("Donation", donationSchema);
 
 // ==========================
 // 🔐 AUTH ROUTES
@@ -62,8 +63,6 @@ const Event = mongoose.model("Event", eventSchema);
 app.post("/auth/signup", async (req, res) => {
   try {
     const { email, password, role } = req.body;
-    console.log("🟢 Incoming signup:", req.body);
-
     if (!email || !password)
       return res.status(400).json({ message: "Email and password required" });
 
@@ -74,10 +73,8 @@ app.post("/auth/signup", async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
     await User.create({ email, passwordHash: hash, role: role || "user" });
 
-    console.log("✅ User created successfully:", email);
     res.json({ message: "Signup successful" });
   } catch (err) {
-    console.error("❌ Signup error:", err);
     res.status(500).json({ message: "Signup failed", error: err.message });
   }
 });
@@ -105,9 +102,7 @@ app.post("/auth/login", async (req, res) => {
 app.get("/auth/me", (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token)
-    return res
-      .status(401)
-      .json({ message: "Access denied: No token provided" });
+    return res.status(401).json({ message: "Access denied: No token provided" });
 
   jwt.verify(token, SECRET_KEY, (err, user) => {
     if (err) return res.status(403).json({ message: "Invalid or expired token" });
@@ -116,7 +111,7 @@ app.get("/auth/me", (req, res) => {
 });
 
 // ==========================
-// 🛡️ AUTH MIDDLEWARES
+// 🛡️ MIDDLEWARES
 // ==========================
 function authenticateToken(req, res, next) {
   const token = req.headers.authorization?.split(" ")[1];
@@ -153,8 +148,12 @@ app.post("/events", authenticateToken, adminOnly, async (req, res) => {
 });
 
 app.get("/events", async (req, res) => {
-  const events = await Event.find().sort({ date: 1 });
-  res.json(events);
+  try {
+    const events = await Event.find().sort({ date: 1 });
+    res.json(events);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch events", error: err.message });
+  }
 });
 
 app.put("/events/:id", authenticateToken, adminOnly, async (req, res) => {
@@ -176,6 +175,29 @@ app.delete("/events/:id", authenticateToken, adminOnly, async (req, res) => {
     res.json({ message: "Event deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: "Failed to delete event", error: err.message });
+  }
+});
+
+// ==========================
+// 💾 DONATION ROUTES
+// ==========================
+app.post("/donations", async (req, res) => {
+  try {
+    const donation = new Donation(req.body);
+    await donation.save();
+    res.status(201).json({ message: "Donation recorded successfully" });
+  } catch (err) {
+    console.error("❌ Donation save failed:", err.message);
+    res.status(500).json({ message: "Failed to record donation" });
+  }
+});
+
+app.get("/donations", authenticateToken, adminOnly, async (req, res) => {
+  try {
+    const donations = await Donation.find().sort({ date: -1 });
+    res.json(donations);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch donations", error: err.message });
   }
 });
 
