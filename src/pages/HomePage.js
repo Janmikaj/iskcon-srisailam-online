@@ -63,7 +63,7 @@ const HomePage = () => {
   ];
 
   return (
-    <Box>
+    <Box sx={{ backgroundColor: "#fff" }}>
       {/* 🌄 Hero Section */}
       <Box
         sx={{
@@ -77,6 +77,7 @@ const HomePage = () => {
           justifyContent: "center",
           alignItems: "center",
           color: "white",
+          textAlign: "center",
           "&::before": {
             content: '""',
             position: "absolute",
@@ -84,49 +85,92 @@ const HomePage = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.5)",
+            backgroundColor: "rgba(0, 0, 0, 0.55)",
           },
         }}
       >
-        <Box sx={{ position: "relative", textAlign: "center", mt: 20 }}>
-          <Typography variant="h6" gutterBottom>
+        <Box sx={{ position: "relative", mt: 20 }}>
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{ letterSpacing: 2, textTransform: "uppercase" }}
+          >
             Welcome to
           </Typography>
-          <Typography variant="h2" component="h1" sx={{ fontWeight: "bold" }}>
+          <Typography
+            variant="h2"
+            component="h1"
+            sx={{
+              fontWeight: "bold",
+              letterSpacing: 1,
+              color: "#fff",
+              textShadow: "2px 2px 8px rgba(0,0,0,0.6)",
+            }}
+          >
             ISKCON Srisailam
           </Typography>
+          <Button
+            variant="contained"
+            color="warning"
+            component={Link}
+            to="/donate"
+            sx={{
+              mt: 4,
+              px: 4,
+              py: 1,
+              fontWeight: "bold",
+              borderRadius: "25px",
+              backgroundColor: "#f57c00",
+              "&:hover": { backgroundColor: "#ef6c00" },
+            }}
+          >
+            Support Our Mission
+          </Button>
         </Box>
       </Box>
 
       {/* 🎉 Events Section */}
-      <Container maxWidth="lg" sx={{ py: 6 }}>
+      <Container maxWidth="lg" sx={{ py: 8 }}>
         <Typography
           variant="h4"
           align="center"
-          sx={{ mb: 4, fontWeight: "bold" }}
+          sx={{
+            mb: 5,
+            fontWeight: "bold",
+            color: "#333",
+            textTransform: "uppercase",
+            letterSpacing: 1,
+          }}
         >
           Upcoming Events (Nov–Dec 2025)
         </Typography>
 
-        <Grid container spacing={3}>
+        <Grid container spacing={4}>
           {events.map((event, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <Card
                 sx={{
                   boxShadow: 4,
                   borderRadius: 3,
-                  transition: "transform 0.3s ease",
-                  "&:hover": { transform: "scale(1.03)" },
+                  overflow: "hidden",
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-6px)",
+                    boxShadow: 8,
+                  },
                 }}
               >
                 <CardMedia
                   component="img"
-                  height="180"
+                  height="200"
                   image={event.image}
                   alt={event.title}
                 />
                 <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: "bold", color: "#f57c00" }}
+                  >
                     {event.title}
                   </Typography>
                   <Typography
@@ -136,14 +180,20 @@ const HomePage = () => {
                   >
                     {event.description}
                   </Typography>
-                  <Typography variant="subtitle2" color="primary">
-                    {event.date}
+                  <Typography variant="subtitle2" color="text.primary">
+                    📅 {event.date}
                   </Typography>
                   <Button
                     variant="contained"
-                    color="primary"
                     size="small"
-                    sx={{ mt: 2 }}
+                    sx={{
+                      mt: 2,
+                      backgroundColor: "#f57c00",
+                      color: "#fff",
+                      borderRadius: "25px",
+                      px: 2.5,
+                      "&:hover": { backgroundColor: "#ef6c00" },
+                    }}
                     component={Link}
                     to="/donate"
                   >
@@ -155,6 +205,20 @@ const HomePage = () => {
           ))}
         </Grid>
       </Container>
+
+      {/* ✨ Footer */}
+      <Box
+        sx={{
+          backgroundColor: "#f9f9f9",
+          py: 3,
+          textAlign: "center",
+          borderTop: "1px solid #eee",
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          © {new Date().getFullYear()} ISKCON Srisailam. All rights reserved.
+        </Typography>
+      </Box>
     </Box>
   );
 };

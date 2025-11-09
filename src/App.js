@@ -1,30 +1,41 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import HomePage from './pages/HomePage';
-import ActivitiesPage from './pages/ActivitiesPage';
-import DonatePage from './pages/DonatePage';
-import ContactPage from './pages/ContactPage';
-import TransactionsPage from './pages/TransactionsPage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import AdminPage from './pages/AdminPage';
-import ProtectedRoute from './utils/ProtectedRoute';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+
+// Pages
+import HomePage from "./pages/HomePage";
+import ActivitiesPage from "./pages/ActivitiesPage";
+import DonatePage from "./pages/DonatePage";
+import ContactPage from "./pages/ContactPage";
+import TransactionsPage from "./pages/TransactionsPage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import AdminPage from "./pages/AdminPage"; // your admin panel main page
+
+// Utils
+import ProtectedRoute from "./utils/ProtectedRoute";
 
 const theme = createTheme({
   palette: {
-    primary: { main: '#FF9933' },
-    secondary: { main: '#138808' },
-    background: { default: '#FFFFFF' },
+    primary: { main: "#FF9933" },
+    secondary: { main: "#138808" },
+    background: { default: "#FFFFFF" },
   },
   typography: { fontFamily: "'Poppins', sans-serif" },
 });
 
 function App() {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
 
   return (
     <ThemeProvider theme={theme}>
@@ -32,11 +43,19 @@ function App() {
       <Router>
         <Header />
         <Routes>
-          {/* Redirect based on login */}
+          {/* Smart Redirect */}
           <Route
             path="/"
             element={
-              token ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
+              token ? (
+                role === "admin" ? (
+                  <Navigate to="/admin/dashboard" replace />
+                ) : (
+                  <Navigate to="/home" replace />
+                )
+              ) : (
+                <Navigate to="/login" replace />
+              )
             }
           />
 
@@ -85,14 +104,19 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Admin Panel */}
           <Route
-            path="/admin"
+            path="/admin/dashboard"
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminPage />
               </ProtectedRoute>
             }
           />
+
+          {/* Catch-all */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Footer />
       </Router>

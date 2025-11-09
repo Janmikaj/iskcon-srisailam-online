@@ -22,6 +22,20 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB (iskcon_srisailam_db)"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
+// 🧹 Drop old index if exists
+mongoose.connection.once("open", async () => {
+  try {
+    const indexes = await mongoose.connection.db.collection("users").indexes();
+    const hasUsernameIndex = indexes.some((idx) => idx.name === "username_1");
+    if (hasUsernameIndex) {
+      await mongoose.connection.db.collection("users").dropIndex("username_1");
+      console.log("🧹 Dropped old index: username_1");
+    }
+  } catch (err) {
+    console.error("⚠️ Failed to drop old index:", err.message);
+  }
+});
+
 // ==========================
 // 🧩 MONGOOSE SCHEMAS
 // ==========================
@@ -48,17 +62,22 @@ const Event = mongoose.model("Event", eventSchema);
 app.post("/auth/signup", async (req, res) => {
   try {
     const { email, password, role } = req.body;
+    console.log("🟢 Incoming signup:", req.body);
+
     if (!email || !password)
       return res.status(400).json({ message: "Email and password required" });
 
     const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ message: "User already exists" });
+    if (existing)
+      return res.status(400).json({ message: "User already exists" });
 
     const hash = await bcrypt.hash(password, 10);
     await User.create({ email, passwordHash: hash, role: role || "user" });
 
+    console.log("✅ User created successfully:", email);
     res.json({ message: "Signup successful" });
   } catch (err) {
+    console.error("❌ Signup error:", err);
     res.status(500).json({ message: "Signup failed", error: err.message });
   }
 });
@@ -70,7 +89,8 @@ app.post("/auth/login", async (req, res) => {
     if (!user) return res.status(400).json({ message: "User not found" });
 
     const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) return res.status(400).json({ message: "Invalid email or password" });
+    if (!valid)
+      return res.status(400).json({ message: "Invalid email or password" });
 
     const token = jwt.sign({ email: user.email, role: user.role }, SECRET_KEY, {
       expiresIn: "2h",
@@ -85,7 +105,9 @@ app.post("/auth/login", async (req, res) => {
 app.get("/auth/me", (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token)
-    return res.status(401).json({ message: "Access denied: No token provided" });
+    return res
+      .status(401)
+      .json({ message: "Access denied: No token provided" });
 
   jwt.verify(token, SECRET_KEY, (err, user) => {
     if (err) return res.status(403).json({ message: "Invalid or expired token" });
@@ -101,14 +123,16 @@ function authenticateToken(req, res, next) {
   if (!token) return res.status(401).json({ message: "Token missing" });
 
   jwt.verify(token, SECRET_KEY, (err, user) => {
-    if (err) return res.status(403).json({ message: "Invalid or expired token" });
+    if (err)
+      return res.status(403).json({ message: "Invalid or expired token" });
     req.user = user;
     next();
   });
 }
 
 function adminOnly(req, res, next) {
-  if (req.user.role !== "admin") return res.status(403).json({ message: "Admins only" });
+  if (req.user.role !== "admin")
+    return res.status(403).json({ message: "Admins only" });
   next();
 }
 
@@ -135,7 +159,9 @@ app.get("/events", async (req, res) => {
 
 app.put("/events/:id", authenticateToken, adminOnly, async (req, res) => {
   try {
-    const updated = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updated = await Event.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
     if (!updated) return res.status(404).json({ message: "Event not found" });
     res.json({ message: "Event updated successfully", event: updated });
   } catch (err) {
@@ -152,32 +178,6 @@ app.delete("/events/:id", authenticateToken, adminOnly, async (req, res) => {
     res.status(500).json({ message: "Failed to delete event", error: err.message });
   }
 });
-
-
-
-
-// // ==========================
-// // 👑 CREATE ADMIN ROUTE (TEMPORARY)
-// // ==========================
-// app.get("/create-admin", async (req, res) => {
-//   try {
-//     const username = "janmikajayam@gmail.com";
-//     const password = "1234";
-//     const role = "admin";
-
-//     // Check if admin already exists
-//     const existing = await User.findOne({ username });
-//     if (existing) return res.status(400).send("⚠️ Admin already exists");
-
-//     const hash = await bcrypt.hash(password, 10);
-//     await User.create({ username, passwordHash: hash, role });
-
-//     res.send("✅ Admin created successfully");
-//   } catch (err) {
-//     console.error("Error creating admin:", err);
-//     res.status(500).send("❌ Error creating admin");
-//   }
-// });
 
 // ==========================
 // 🚀 START SERVER
