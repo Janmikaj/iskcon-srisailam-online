@@ -16,7 +16,7 @@ import {
   Alert,
 } from "@mui/material";
 import { Edit, Delete, Event, AddCircle } from "@mui/icons-material";
-import axios from "axios";
+import api from "../utils/api";
 
 const AdminPage = () => {
   const [events, setEvents] = useState([]);
@@ -28,10 +28,11 @@ const AdminPage = () => {
   // ✅ Fetch events
   const fetchEvents = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/events");
+      const res = await api.get("/events");
       setEvents(res.data);
     } catch (err) {
-      console.error("Error fetching events:", err);
+      console.error("Error fetching events:", err.response?.data || err.message);
+      setSnackbar({ open: true, message: "Failed to fetch events", severity: "error" });
     }
   };
 
@@ -41,29 +42,33 @@ const AdminPage = () => {
 
   // ✅ Handle add / update event
   const handleSave = async () => {
+    if (!newEvent.title || !newEvent.date) {
+      return setSnackbar({ open: true, message: "Title and Date are required", severity: "warning" });
+    }
+
     try {
-      if (!newEvent.title || !newEvent.date) {
-        return setSnackbar({ open: true, message: "Title and Date are required", severity: "warning" });
-      }
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
+      };
 
       if (editId) {
-        await axios.put(`http://localhost:5000/events/${editId}`, newEvent, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setSnackbar({ open: true, message: "Event updated successfully", severity: "success" });
+        const res = await api.put(`/events/${editId}`, newEvent, config);
+        setSnackbar({ open: true, message: res.data.message || "Event updated successfully", severity: "success" });
       } else {
-        await axios.post("http://localhost:5000/events", newEvent, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setSnackbar({ open: true, message: "Event added successfully", severity: "success" });
+        const res = await api.post("/events", newEvent, config);
+        setSnackbar({ open: true, message: res.data.message || "Event added successfully", severity: "success" });
       }
 
       setNewEvent({ title: "", date: "", description: "", image: "" });
       setEditId(null);
       fetchEvents();
     } catch (err) {
-      setSnackbar({ open: true, message: "Failed to save event", severity: "error" });
-      console.error(err);
+      console.error("Event save failed:", err.response?.data || err.message);
+      setSnackbar({
+        open: true,
+        message: err.response?.data?.message || "Failed to save event",
+        severity: "error",
+      });
     }
   };
 
@@ -82,14 +87,15 @@ const AdminPage = () => {
   // ✅ Handle delete
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this event?")) return;
+
     try {
-      await axios.delete(`http://localhost:5000/events/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSnackbar({ open: true, message: "Event deleted", severity: "info" });
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const res = await api.delete(`/events/${id}`, config);
+      setSnackbar({ open: true, message: res.data.message || "Event deleted", severity: "info" });
       fetchEvents();
     } catch (err) {
-      setSnackbar({ open: true, message: "Failed to delete event", severity: "error" });
+      console.error("Event delete failed:", err.response?.data || err.message);
+      setSnackbar({ open: true, message: err.response?.data?.message || "Failed to delete event", severity: "error" });
     }
   };
 
@@ -165,13 +171,7 @@ const AdminPage = () => {
                   component="img"
                   src={event.image}
                   alt={event.title}
-                  sx={{
-                    width: "100%",
-                    height: 180,
-                    objectFit: "cover",
-                    borderTopLeftRadius: 12,
-                    borderTopRightRadius: 12,
-                  }}
+                  sx={{ width: "100%", height: 180, objectFit: "cover", borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
                 />
               )}
               <CardContent>
