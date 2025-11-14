@@ -19,7 +19,7 @@ import ContactPage from "./pages/ContactPage";
 import TransactionsPage from "./pages/TransactionsPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import AdminPage from "./pages/AdminPage"; // your admin panel main page
+import AdminPage from "./pages/AdminPage";
 
 // Utils
 import ProtectedRoute from "./utils/ProtectedRoute";
@@ -41,84 +41,99 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Header />
-        <Routes>
-          {/* Smart Redirect */}
-          <Route
-            path="/"
-            element={
-              token ? (
-                role === "admin" ? (
-                  <Navigate to="/admin/dashboard" replace />
-                ) : (
-                  <Navigate to="/home" replace />
-                )
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
+        {/* 👇 Sticky Bottom Layout Wrapper */}
+        <div
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Header />
 
-          {/* Public */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+          {/* 👇 Main content grows and pushes footer down */}
+          <div style={{ flex: 1 }}>
+            <Routes>
+              {/* Smart Redirect */}
+              <Route
+                path="/"
+                element={
+                  token ? (
+                    role === "admin" ? (
+                      <Navigate to="/admin/dashboard" replace />
+                    ) : (
+                      <Navigate to="/home" replace />
+                    )
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
 
-          {/* Protected */}
-          <Route
-            path="/home"
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/activities"
-            element={
-              <ProtectedRoute>
-                <ActivitiesPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/donate"
-            element={
-              <ProtectedRoute>
-                <DonatePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/contact"
-            element={
-              <ProtectedRoute>
-                <ContactPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/transactions"
-            element={
-              <ProtectedRoute>
-                <TransactionsPage />
-              </ProtectedRoute>
-            }
-          />
+              {/* Public */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
 
-          {/* Admin Panel */}
-          <Route
-            path="/admin/dashboard"
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminPage />
-              </ProtectedRoute>
-            }
-          />
+              {/* Protected */}
+              <Route
+                path="/home"
+                element={
+                  <ProtectedRoute>
+                    <HomePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/activities"
+                element={
+                  <ProtectedRoute>
+                    <ActivitiesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/donate"
+                element={
+                  <ProtectedRoute>
+                    <DonatePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/contact"
+                element={
+                  <ProtectedRoute>
+                    <ContactPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/transactions"
+                element={
+                  <ProtectedRoute>
+                    <TransactionsPage />
+                  </ProtectedRoute>
+                }
+              />
 
-          {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        <Footer />
+              {/* Admin */}
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Catch-all */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+
+          {/* 👇 Footer stays at bottom */}
+          <Footer />
+        </div>
       </Router>
     </ThemeProvider>
   );
