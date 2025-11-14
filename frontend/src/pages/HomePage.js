@@ -10,7 +10,9 @@ import {
   Grid,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+
+// ✅ Removed useTranslation (unused)
+// import { useTranslation } from "react-i18next";
 
 // ✅ Local images
 import WelcomeImage from "../assets/topimage.jpg";
@@ -21,7 +23,8 @@ import VaikunthaEkadashi from "../assets/vaikuntha_ekadashi.jpg";
 import NewYearKirtan from "../assets/newyear_kirtan.jpg";
 
 const HomePage = () => {
-  const { t } = useTranslation();
+
+  // Removed: const { t } = useTranslation();
 
   // ✅ Upcoming events (Nov–Dec 2025)
   const events = [
@@ -64,6 +67,7 @@ const HomePage = () => {
 
   return (
     <Box sx={{ backgroundColor: "#fff" }}>
+      
       {/* 🌄 Hero Section */}
       <Box
         sx={{

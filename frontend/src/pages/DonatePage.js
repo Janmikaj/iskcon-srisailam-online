@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Container,
   Typography,
@@ -26,6 +26,7 @@ const DonatePage = () => {
       pan: "",
       amount: "",
     },
+
     validationSchema: Yup.object({
       firstName: Yup.string().required("First name is required"),
       lastName: Yup.string().required("Last name is required"),
@@ -39,11 +40,7 @@ const DonatePage = () => {
         "pan-required",
         "PAN is required for 80G benefits",
         function (value) {
-          const { wants80G } = this.parent;
-          if (wants80G) {
-            return !!value;
-          }
-          return true;
+          return this.parent.wants80G ? !!value : true;
         }
       ),
       amount: Yup.number()
@@ -51,10 +48,17 @@ const DonatePage = () => {
         .required("Donation amount is required")
         .min(1, "Amount must be greater than 0"),
     }),
+
     onSubmit: async (values, { resetForm }) => {
       try {
-        const res = await axios.post("https://iskcon-srisailam-online.onrender.com/donations", values);
-        alert(`🙏 Thank you for your donation of ₹${values.amount}! Hare Krishna!`);
+        await axios.post(
+          "https://iskcon-srisailam-online.onrender.com/donations",
+          values
+        );
+
+        alert(
+          `🙏 Thank you for your donation of ₹${values.amount}! Hare Krishna!`
+        );
         resetForm();
       } catch (err) {
         alert("Failed to record donation: " + err.message);
@@ -69,14 +73,13 @@ const DonatePage = () => {
           my: 4,
           p: 4,
           border: "1px solid #ddd",
-          borderRadius: "8px",
+          borderRadius: "12px",
           backgroundColor: "#f9f9f9",
         }}
       >
         <Typography
           variant="h4"
           align="center"
-          gutterBottom
           sx={{ mb: 4, fontWeight: "bold", color: "#333" }}
         >
           Proceed to Donation
@@ -84,6 +87,7 @@ const DonatePage = () => {
 
         <form onSubmit={formik.handleSubmit}>
           <Grid container spacing={2}>
+            {/* First Name */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -93,11 +97,16 @@ const DonatePage = () => {
                 value={formik.values.firstName}
                 onChange={formik.handleChange}
                 error={
-                  formik.touched.firstName && Boolean(formik.errors.firstName)
+                  formik.touched.firstName &&
+                  Boolean(formik.errors.firstName)
                 }
-                helperText={formik.touched.firstName && formik.errors.firstName}
+                helperText={
+                  formik.touched.firstName && formik.errors.firstName
+                }
               />
             </Grid>
+
+            {/* Last Name */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -107,11 +116,16 @@ const DonatePage = () => {
                 value={formik.values.lastName}
                 onChange={formik.handleChange}
                 error={
-                  formik.touched.lastName && Boolean(formik.errors.lastName)
+                  formik.touched.lastName &&
+                  Boolean(formik.errors.lastName)
                 }
-                helperText={formik.touched.lastName && formik.errors.lastName}
+                helperText={
+                  formik.touched.lastName && formik.errors.lastName
+                }
               />
             </Grid>
+
+            {/* Phone */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -120,10 +134,14 @@ const DonatePage = () => {
                 label="Phone"
                 value={formik.values.phone}
                 onChange={formik.handleChange}
-                error={formik.touched.phone && Boolean(formik.errors.phone)}
+                error={
+                  formik.touched.phone && Boolean(formik.errors.phone)
+                }
                 helperText={formik.touched.phone && formik.errors.phone}
               />
             </Grid>
+
+            {/* Email */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -132,11 +150,14 @@ const DonatePage = () => {
                 label="Email"
                 value={formik.values.email}
                 onChange={formik.handleChange}
-                error={formik.touched.email && Boolean(formik.errors.email)}
+                error={
+                  formik.touched.email && Boolean(formik.errors.email)
+                }
                 helperText={formik.touched.email && formik.errors.email}
               />
             </Grid>
 
+            {/* Checkbox – 80G Benefit */}
             <Grid item xs={12}>
               <FormControlLabel
                 control={
@@ -151,6 +172,7 @@ const DonatePage = () => {
               />
             </Grid>
 
+            {/* PAN – Only if wants80G */}
             {formik.values.wants80G && (
               <Grid item xs={12}>
                 <TextField
@@ -166,11 +188,13 @@ const DonatePage = () => {
               </Grid>
             )}
 
+            {/* Amount */}
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
               <Typography variant="body1" gutterBottom>
                 Enter Donation Amount:
               </Typography>
+
               <TextField
                 fullWidth
                 id="amount"
@@ -179,15 +203,17 @@ const DonatePage = () => {
                 type="number"
                 value={formik.values.amount}
                 onChange={formik.handleChange}
-                error={formik.touched.amount && Boolean(formik.errors.amount)}
+                error={
+                  formik.touched.amount && Boolean(formik.errors.amount)
+                }
                 helperText={formik.touched.amount && formik.errors.amount}
               />
             </Grid>
 
+            {/* Submit Button */}
             <Grid item xs={12}>
               <Button
                 variant="contained"
-                color="primary"
                 fullWidth
                 type="submit"
                 sx={{
@@ -195,9 +221,8 @@ const DonatePage = () => {
                   py: 1.5,
                   backgroundColor: "#FF9933",
                   fontWeight: "bold",
-                  "&:hover": {
-                    backgroundColor: "#FF7F00",
-                  },
+                  fontSize: "16px",
+                  "&:hover": { backgroundColor: "#FF7F00" },
                 }}
               >
                 Donate Now
@@ -206,11 +231,12 @@ const DonatePage = () => {
           </Grid>
         </form>
 
-        {/* ✅ QR Code section */}
+        {/* QR Code Section */}
         <Box sx={{ mt: 5, textAlign: "center" }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
             Scan this QR to Donate
           </Typography>
+
           <img
             src={upiqr}
             alt="UPI QR Code"
@@ -221,6 +247,7 @@ const DonatePage = () => {
               border: "1px solid #ccc",
             }}
           />
+
           <Typography variant="body2" sx={{ mt: 2 }} color="text.secondary">
             <strong>UPI ID:</strong> 9032641581@hdfcbank
           </Typography>
