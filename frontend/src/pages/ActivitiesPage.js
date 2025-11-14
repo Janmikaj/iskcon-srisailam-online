@@ -24,6 +24,19 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useTranslation } from 'react-i18next';
 import api from '../utils/api';
 
+// ⭐ Retry logic to handle Render cold start
+const retryFetch = async (url, retries = 3, delay = 2000) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await api.get(url);
+    } catch (err) {
+      console.log(`Retry ${i + 1}/${retries} failed...`);
+      if (i === retries - 1) throw err;
+      await new Promise((res) => setTimeout(res, delay));
+    }
+  }
+};
+
 const ActivitiesPage = () => {
   const { t } = useTranslation();
   const [view, setView] = useState('list');
@@ -35,23 +48,33 @@ const ActivitiesPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🧩 Fetch only backend events
+  // ⭐ Load from backend + use cache for fast reloads
   useEffect(() => {
+    const cached = sessionStorage.getItem('events');
+    if (cached) {
+      setEvents(JSON.parse(cached));
+      setLoading(false);
+    }
+
     const fetchEvents = async () => {
       try {
-        const res = await api.get('/events');
-        const backendEvents = res.data.map(ev => ({
+        const res = await retryFetch('/events', 3, 2000);
+        const backendEvents = res.data.map((ev) => ({
           ...ev,
           date: new Date(ev.date),
         }));
+
         backendEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
         setEvents(backendEvents);
+
+        sessionStorage.setItem('events', JSON.stringify(backendEvents));
       } catch (err) {
         console.error('❌ Failed to fetch events:', err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchEvents();
   }, []);
 
@@ -70,6 +93,7 @@ const ActivitiesPage = () => {
   const EventDay = (props) => {
     const { day, outsideCurrentMonth, ...other } = props;
     const hasEvents = getEventsForDate(day).length > 0;
+
     return (
       <Badge
         overlap="circular"
@@ -148,8 +172,23 @@ const ActivitiesPage = () => {
         </Box>
 
         <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
+          {/* ⭐ Improved loading skeleton */}
           {loading ? (
-            <Typography>Loading events...</Typography>
+            <Grid container spacing={2}>
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <Grid item xs={12} sm={6} md={4} key={n}>
+                  <Card sx={{ p: 2 }}>
+                    <Box
+                      sx={{
+                        height: 80,
+                        background: '#eee',
+                        borderRadius: 2,
+                      }}
+                    />
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
           ) : view === 'list' ? (
             <Grid container spacing={2}>
               {events.length === 0 ? (
@@ -165,13 +204,19 @@ const ActivitiesPage = () => {
                       sx={{
                         cursor: 'pointer',
                         transition: '0.3s',
-                        '&:hover': { transform: 'scale(1.03)', boxShadow: 6 },
+                        '&:hover': {
+                          transform: 'scale(1.03)',
+                          boxShadow: 6,
+                        },
                         borderRadius: 2,
                         backgroundColor: '#ffffff',
                       }}
                     >
                       <CardContent>
-                        <Typography variant="h6" sx={{ color: '#004d40', mb: 1 }}>
+                        <Typography
+                          variant="h6"
+                          sx={{ color: '#004d40', mb: 1 }}
+                        >
                           {event.title}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
@@ -202,7 +247,7 @@ const ActivitiesPage = () => {
           )}
         </Paper>
 
-        {/* Event Details Dialog */}
+        {/* ⭐ Event Details Dialog */}
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle sx={{ fontWeight: 'bold', color: '#00796b' }}>
             {selectedEvents.length === 1
@@ -213,7 +258,8 @@ const ActivitiesPage = () => {
             {selectedEvents.map((event, index) => (
               <Box key={index} sx={{ mb: 2 }}>
                 <DialogContentText>
-                  <strong>Date:</strong> {new Date(event.date).toLocaleDateString()}
+                  <strong>Date:</strong>{' '}
+                  {new Date(event.date).toLocaleDateString()}
                 </DialogContentText>
                 {event.time && (
                   <DialogContentText>
@@ -236,7 +282,7 @@ const ActivitiesPage = () => {
           </DialogActions>
         </Dialog>
 
-        {/* Donation Dialog */}
+        {/* ⭐ Donation Dialog */}
         <Dialog open={donateOpen} onClose={handleDonateClose}>
           <DialogTitle sx={{ fontWeight: 'bold', color: '#00796b' }}>
             Make a Donation
