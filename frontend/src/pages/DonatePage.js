@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Container,
   Typography,
@@ -9,13 +9,19 @@ import {
   FormControlLabel,
   Checkbox,
   Divider,
+  Modal,
+  Paper,
 } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
-import upiqr from "../assets/upiqr.jpg";
+import { QRCodeCanvas } from "qrcode.react";
 
 const DonatePage = () => {
+  const [openQR, setOpenQR] = useState(false);
+  const [upiLink, setUpiLink] = useState("");
+  const [payAmount, setPayAmount] = useState("");
+
   const formik = useFormik({
     initialValues: {
       firstName: "",
@@ -56,9 +62,15 @@ const DonatePage = () => {
           values
         );
 
-        alert(
-          `🙏 Thank you for your donation of ₹${values.amount}! Hare Krishna!`
-        );
+        // Save amount before clearing form
+        setPayAmount(values.amount);
+
+        // Create UPI link with amount
+        const link = `upi://pay?pa=9032641581@hdfcbank&pn=ISKCON%20Srisailam&am=${values.amount}&cu=INR`;
+
+        setUpiLink(link);
+        setOpenQR(true);
+
         resetForm();
       } catch (err) {
         alert("Failed to record donation: " + err.message);
@@ -96,13 +108,8 @@ const DonatePage = () => {
                 label="First Name"
                 value={formik.values.firstName}
                 onChange={formik.handleChange}
-                error={
-                  formik.touched.firstName &&
-                  Boolean(formik.errors.firstName)
-                }
-                helperText={
-                  formik.touched.firstName && formik.errors.firstName
-                }
+                error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                helperText={formik.touched.firstName && formik.errors.firstName}
               />
             </Grid>
 
@@ -115,13 +122,8 @@ const DonatePage = () => {
                 label="Last Name"
                 value={formik.values.lastName}
                 onChange={formik.handleChange}
-                error={
-                  formik.touched.lastName &&
-                  Boolean(formik.errors.lastName)
-                }
-                helperText={
-                  formik.touched.lastName && formik.errors.lastName
-                }
+                error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+                helperText={formik.touched.lastName && formik.errors.lastName}
               />
             </Grid>
 
@@ -134,9 +136,7 @@ const DonatePage = () => {
                 label="Phone"
                 value={formik.values.phone}
                 onChange={formik.handleChange}
-                error={
-                  formik.touched.phone && Boolean(formik.errors.phone)
-                }
+                error={formik.touched.phone && Boolean(formik.errors.phone)}
                 helperText={formik.touched.phone && formik.errors.phone}
               />
             </Grid>
@@ -150,14 +150,12 @@ const DonatePage = () => {
                 label="Email"
                 value={formik.values.email}
                 onChange={formik.handleChange}
-                error={
-                  formik.touched.email && Boolean(formik.errors.email)
-                }
+                error={formik.touched.email && Boolean(formik.errors.email)}
                 helperText={formik.touched.email && formik.errors.email}
               />
             </Grid>
 
-            {/* Checkbox – 80G Benefit */}
+            {/* 80G Checkbox */}
             <Grid item xs={12}>
               <FormControlLabel
                 control={
@@ -172,7 +170,7 @@ const DonatePage = () => {
               />
             </Grid>
 
-            {/* PAN – Only if wants80G */}
+            {/* PAN */}
             {formik.values.wants80G && (
               <Grid item xs={12}>
                 <TextField
@@ -203,14 +201,12 @@ const DonatePage = () => {
                 type="number"
                 value={formik.values.amount}
                 onChange={formik.handleChange}
-                error={
-                  formik.touched.amount && Boolean(formik.errors.amount)
-                }
+                error={formik.touched.amount && Boolean(formik.errors.amount)}
                 helperText={formik.touched.amount && formik.errors.amount}
               />
             </Grid>
 
-            {/* Submit Button */}
+            {/* Donate Button */}
             <Grid item xs={12}>
               <Button
                 variant="contained"
@@ -230,29 +226,41 @@ const DonatePage = () => {
             </Grid>
           </Grid>
         </form>
-
-        {/* QR Code Section */}
-        <Box sx={{ mt: 5, textAlign: "center" }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Scan this QR to Donate
-          </Typography>
-
-          <img
-            src={upiqr}
-            alt="UPI QR Code"
-            style={{
-              width: "250px",
-              height: "250px",
-              borderRadius: "8px",
-              border: "1px solid #ccc",
-            }}
-          />
-
-          <Typography variant="body2" sx={{ mt: 2 }} color="text.secondary">
-            <strong>UPI ID:</strong> 9032641581@hdfcbank
-          </Typography>
-        </Box>
       </Box>
+
+      {/* QR POPUP */}
+      <Modal open={openQR} onClose={() => setOpenQR(false)}>
+        <Paper
+          sx={{
+            p: 4,
+            width: 350,
+            mx: "auto",
+            mt: "10%",
+            textAlign: "center",
+            borderRadius: 3,
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Scan to Pay ₹{payAmount}
+          </Typography>
+
+          {/* Auto-generated QR */}
+          <QRCodeCanvas value={upiLink} size={230} />
+
+          <Typography sx={{ mt: 2 }} color="text.secondary">
+            UPI ID: 9032641581@hdfcbank
+          </Typography>
+
+          <Button
+            sx={{ mt: 3 }}
+            fullWidth
+            variant="contained"
+            onClick={() => setOpenQR(false)}
+          >
+            Close
+          </Button>
+        </Paper>
+      </Modal>
     </Container>
   );
 };
