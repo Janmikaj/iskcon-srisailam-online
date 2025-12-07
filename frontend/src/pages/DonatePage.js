@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import axios from "axios";
+import api from "../utils/api";
 import { QRCodeCanvas } from "qrcode.react";
 
 const DonatePage = () => {
@@ -57,10 +57,7 @@ const DonatePage = () => {
 
     onSubmit: async (values, { resetForm }) => {
       try {
-        await axios.post(
-          "https://iskcon-srisailam-online.onrender.com/donations",
-          values
-        );
+        await api.post("/donations", values);
 
         // Save amount before clearing form
         setPayAmount(values.amount);

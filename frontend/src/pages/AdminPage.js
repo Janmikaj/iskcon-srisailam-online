@@ -27,6 +27,7 @@ const AdminPage = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -49,6 +50,7 @@ const AdminPage = () => {
       return setSnackbar({ open: true, message: "Title and Date are required", severity: "warning" });
     }
 
+    setLoading(true);
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -57,14 +59,17 @@ const AdminPage = () => {
         setSnackbar({ open: true, message: "Event updated successfully", severity: "success" });
       } else {
         await api.post("/events", newEvent, config);
-        setSnackbar({ open: true, message: "Event added successfully", severity: "success" });
+        setSnackbar({ open: true, message: "Event added (emails sending...)", severity: "success" });
       }
 
       setNewEvent({ title: "", date: "", description: "", image: "" });
       setEditId(null);
       fetchEvents();
     } catch (err) {
+      console.error(err);
       setSnackbar({ open: true, message: "Failed to save event", severity: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -178,8 +183,8 @@ const AdminPage = () => {
               value={newEvent.image}
               onChange={(e) => setNewEvent({ ...newEvent, image: e.target.value })}
             />
-            <Button variant="contained" onClick={handleSave}>
-              {editId ? "Update Event" : "Add Event"}
+            <Button variant="contained" onClick={handleSave} disabled={loading}>
+              {loading ? "Processing..." : (editId ? "Update Event" : "Add Event")}
             </Button>
           </Box>
         </Card>
