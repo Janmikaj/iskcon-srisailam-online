@@ -283,9 +283,12 @@ const ActivitiesPage = () => {
                     <strong>Time:</strong> {event.time}
                   </DialogContentText>
                 )}
-                <DialogContentText>
-                  <strong>Details:</strong> {event.description}
+                <DialogContentText sx={{ mb: 1 }}>
+                  <strong>Details:</strong>
                 </DialogContentText>
+                <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                  {event.description}
+                </Typography>
               </Box>
             ))}
           </DialogContent>
