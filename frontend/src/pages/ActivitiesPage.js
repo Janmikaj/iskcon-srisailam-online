@@ -16,8 +16,10 @@ import {
   Grid,
   Card,
   CardContent,
+  CardMedia,
   TextField,
 } from '@mui/material';
+import { spiritualImages } from '../utils/images';
     
 import { DateCalendar, PickersDay } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -213,6 +215,12 @@ const ActivitiesPage = () => {
                         backgroundColor: '#ffffff',
                       }}
                     >
+                      <CardMedia
+                        component="img"
+                        height="140"
+                        image={event.imageUrl || spiritualImages[index % spiritualImages.length]}
+                        alt={event.title}
+                      />
                       <CardContent>
                         <Typography
                           variant="h6"

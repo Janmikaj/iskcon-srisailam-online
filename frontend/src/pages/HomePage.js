@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import api from "../utils/api";
+import { spiritualImages } from "../utils/images";
 
 // ✅ Local images
 import WelcomeImage from "../assets/topimage.jpg";
@@ -158,7 +159,7 @@ const HomePage = () => {
                   <CardMedia
                     component="img"
                     height="200"
-                    image={event.imageUrl || "https://images.unsplash.com/photo-1545063914-a1a6ec821c88?q=80&w=2070&auto=format&fit=crop"}
+                    image={event.imageUrl || spiritualImages[index % spiritualImages.length]}
                     alt={event.title}
                   />
                   <CardContent sx={{ flexGrow: 1 }}>
