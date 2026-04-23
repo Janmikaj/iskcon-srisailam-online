@@ -220,7 +220,7 @@ const ActivitiesPage = () => {
                     >
                       <CardMedia
                         component="img"
-                        height="140"
+                        height="200"
                         image={event.imageUrl || getEventImage(event.title, index)}
                         alt={event.title}
                         onError={(e) => handleImageError(e, event.title, index)}
