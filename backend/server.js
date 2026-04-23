@@ -1,4 +1,7 @@
 import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+
 import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -22,7 +25,14 @@ const PORT = process.env.PORT || 5000;
 const SECRET_KEY = process.env.JWT_SECRET;
 const MONGO_URI = process.env.MONGO_URI;
 
-// Email logic moved to brevoEmail.js
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// --------------------------------------
+// 📦 Serve Frontend Static Files
+// --------------------------------------
+const frontendBuildPath = path.join(__dirname, "../frontend/build");
+app.use(express.static(frontendBuildPath));
 
 // --------------------------------------
 // 🛢 Mongo Connection
@@ -135,8 +145,8 @@ app.post("/events", authenticateToken, adminOnly, async (req, res) => {
 
     const event = await Event.create({ title, date, image, description, time });
 
-    // Fetch all user emails
-    const users = await User.find({}, "email");
+    // Fetch all user emails (excluding admins)
+    const users = await User.find({ role: "user" }, "email");
     const emailList = users.map(u => u.email).filter(e => e); // Filter undefined/null
 
     console.log(`🔍 Found ${emailList.length} users to email.`);
@@ -234,8 +244,11 @@ app.get("/donations", authenticateToken, adminOnly, async (req, res) => {
 
 
 // --------------------------------------
-app.get("/", (req, res) => res.send("ISKCON API Running"));
+// 🌍 SPA Routing: Serve index.html for all other routes
 // --------------------------------------
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontendBuildPath, "index.html"));
+});
 
 app.listen(PORT, () =>
   console.log(`🚀 Server running at http://localhost:${PORT}`)
