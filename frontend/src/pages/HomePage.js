@@ -177,10 +177,10 @@ const HomePage = () => {
                         mt: 1, 
                         mb: 1,
                         display: '-webkit-box',
-                        WebkitLineClamp: 4,
+                        WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden',
-                        minHeight: '4.8em', // Forces space for 4 lines
+                        minHeight: '2.5em', 
                       }}
                     >
                       {event.description}

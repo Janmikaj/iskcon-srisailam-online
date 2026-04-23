@@ -18,7 +18,9 @@ import {
   CardContent,
   CardMedia,
   TextField,
+  IconButton,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { Link } from 'react-router-dom';
 import { getEventImage, handleImageError } from '../utils/images';
     
@@ -236,10 +238,10 @@ const ActivitiesPage = () => {
                           sx={{
                             mt: 1,
                             display: '-webkit-box',
-                            WebkitLineClamp: 4,
+                            WebkitLineClamp: 2,
                             WebkitBoxOrient: 'vertical',
                             overflow: 'hidden',
-                            minHeight: '4.8em'
+                            minHeight: '2.5em'
                           }}
                         >
                           {event.description}
@@ -266,10 +268,22 @@ const ActivitiesPage = () => {
 
         {/* ⭐ Event Details Dialog */}
         <Dialog open={open} onClose={handleClose}>
-          <DialogTitle sx={{ fontWeight: 'bold', color: '#00796b' }}>
+          <DialogTitle sx={{ fontWeight: 'bold', color: '#00796b', pr: 6 }}>
             {selectedEvents.length === 1
               ? selectedEvents[0].title
               : `Events on ${selectedEvents[0]?.date.toLocaleDateString()}`}
+            <IconButton
+              aria-label="close"
+              onClick={handleClose}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+                color: (theme) => theme.palette.grey[500],
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
           </DialogTitle>
           <DialogContent>
             {selectedEvents.map((event, index) => (
@@ -295,17 +309,19 @@ const ActivitiesPage = () => {
           <DialogActions>
             {selectedEvents.length === 1 && (
               <Button
-                variant="outlined"
-                sx={{ color: '#f57c00', borderColor: '#f57c00' }}
+                variant="contained"
+                sx={{ 
+                  backgroundColor: '#f57c00', 
+                  '&:hover': { backgroundColor: '#ef6c00' },
+                  borderRadius: 2
+                }}
                 component={Link}
                 to={`/donate?event=${encodeURIComponent(selectedEvents[0].title)}`}
+                fullWidth
               >
-                Donate
+                Donate for this Event
               </Button>
             )}
-            <Button onClick={handleClose} color="success" variant="contained">
-              Close
-            </Button>
           </DialogActions>
         </Dialog>
 
