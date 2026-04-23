@@ -180,7 +180,7 @@ const HomePage = () => {
                         WebkitLineClamp: 4,
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden',
-                        height: '4.5em', // Approx 4 lines
+                        minHeight: '4.8em', // Forces space for 4 lines
                       }}
                     >
                       {event.description}

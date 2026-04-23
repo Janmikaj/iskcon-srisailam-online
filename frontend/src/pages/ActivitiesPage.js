@@ -236,44 +236,14 @@ const ActivitiesPage = () => {
                           sx={{
                             mt: 1,
                             display: '-webkit-box',
-                            WebkitLineClamp: 3,
+                            WebkitLineClamp: 4,
                             WebkitBoxOrient: 'vertical',
                             overflow: 'hidden',
-                            height: '3.2em'
+                            minHeight: '4.8em'
                           }}
                         >
                           {event.description}
                         </Typography>
-                        <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            fullWidth
-                            sx={{ borderRadius: 2 }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedEvents([event]);
-                              setOpen(true);
-                            }}
-                          >
-                            Details
-                          </Button>
-                          <Button
-                            variant="contained"
-                            size="small"
-                            fullWidth
-                            sx={{ 
-                              borderRadius: 2,
-                              backgroundColor: '#f57c00',
-                              '&:hover': { backgroundColor: '#ef6c00' }
-                            }}
-                            component={Link}
-                            to={`/donate?event=${encodeURIComponent(event.title)}`}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            Donate
-                          </Button>
-                        </Box>
                       </CardContent>
                     </Card>
                   </Grid>
@@ -320,46 +290,22 @@ const ActivitiesPage = () => {
             ))}
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleDonateClick} color="primary" variant="outlined">
-              Donate
-            </Button>
+            {selectedEvents.length === 1 && (
+              <Button
+                variant="outlined"
+                sx={{ color: '#f57c00', borderColor: '#f57c00' }}
+                component={Link}
+                to={`/donate?event=${encodeURIComponent(selectedEvents[0].title)}`}
+              >
+                Donate
+              </Button>
+            )}
             <Button onClick={handleClose} color="success" variant="contained">
               Close
             </Button>
           </DialogActions>
         </Dialog>
 
-        {/* ⭐ Donation Dialog */}
-        <Dialog open={donateOpen} onClose={handleDonateClose}>
-          <DialogTitle sx={{ fontWeight: 'bold', color: '#00796b' }}>
-            Make a Donation
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Your generous donation supports our temple activities and community services. 🙏
-            </DialogContentText>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Donation Amount (₹)"
-              type="number"
-              fullWidth
-              value={donationAmount}
-              onChange={(e) => setDonationAmount(e.target.value)}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleDonateClose}>Cancel</Button>
-            <Button
-              onClick={handleDonateSubmit}
-              color="success"
-              variant="contained"
-              disabled={!donationAmount}
-            >
-              Donate
-            </Button>
-          </DialogActions>
-        </Dialog>
       </Container>
     </Box>
   );
