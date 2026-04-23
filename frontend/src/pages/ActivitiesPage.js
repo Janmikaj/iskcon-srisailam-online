@@ -19,6 +19,7 @@ import {
   CardMedia,
   TextField,
 } from '@mui/material';
+import { Link } from 'react-router-dom';
 import { getEventImage, handleImageError } from '../utils/images';
     
 import { DateCalendar, PickersDay } from '@mui/x-date-pickers';
@@ -229,14 +230,50 @@ const ActivitiesPage = () => {
                         >
                           {event.title}
                         </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          📅 {new Date(event.date).toLocaleDateString()}
+                        <Typography
+                          variant="body2"
+                          color="textSecondary"
+                          sx={{
+                            mt: 1,
+                            display: '-webkit-box',
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            height: '3.2em'
+                          }}
+                        >
+                          {event.description}
                         </Typography>
-                        {event.time && (
-                          <Typography variant="body2" color="textSecondary">
-                            ⏰ {event.time}
-                          </Typography>
-                        )}
+                        <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            fullWidth
+                            sx={{ borderRadius: 2 }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedEvents([event]);
+                              setOpen(true);
+                            }}
+                          >
+                            Details
+                          </Button>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            fullWidth
+                            sx={{ 
+                              borderRadius: 2,
+                              backgroundColor: '#f57c00',
+                              '&:hover': { backgroundColor: '#ef6c00' }
+                            }}
+                            component={Link}
+                            to={`/donate?event=${encodeURIComponent(event.title)}`}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Donate
+                          </Button>
+                        </Box>
                       </CardContent>
                     </Card>
                   </Grid>

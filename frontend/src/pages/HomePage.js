@@ -173,11 +173,17 @@ const HomePage = () => {
                     <Typography
                       variant="body2"
                       color="text.secondary"
-                      sx={{ mt: 1, mb: 1 }}
+                      sx={{ 
+                        mt: 1, 
+                        mb: 1,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 4,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        height: '4.5em', // Approx 4 lines
+                      }}
                     >
-                      {event.description?.length > 120 
-                        ? `${event.description.substring(0, 120)}...` 
-                        : event.description}
+                      {event.description}
                     </Typography>
                     <Typography variant="subtitle2" color="text.primary">
                       📅 {new Date(event.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -194,9 +200,9 @@ const HomePage = () => {
                         "&:hover": { backgroundColor: "#ef6c00" },
                       }}
                       component={Link}
-                      to="/activities"
+                      to={`/donate?event=${encodeURIComponent(event.title)}`}
                     >
-                      View Details
+                      Donate
                     </Button>
                   </Box>
                 </Card>

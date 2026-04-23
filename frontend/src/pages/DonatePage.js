@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
   Container,
   Typography,
@@ -31,6 +32,7 @@ const DonatePage = () => {
       wants80G: false,
       pan: "",
       amount: "",
+      purpose: "",
     },
 
     validationSchema: Yup.object({
@@ -74,6 +76,16 @@ const DonatePage = () => {
       }
     },
   });
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const eventName = params.get("event");
+    if (eventName) {
+      formik.setFieldValue("purpose", eventName);
+    }
+  }, [location]);
 
   return (
     <Container maxWidth="md">
@@ -200,6 +212,21 @@ const DonatePage = () => {
                 onChange={formik.handleChange}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
                 helperText={formik.touched.amount && formik.errors.amount}
+              />
+            </Grid>
+
+            {/* Purpose/Activity */}
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                id="purpose"
+                name="purpose"
+                label="Purpose of Donation / Activity Name"
+                placeholder="e.g. Kirtan Night, Temple Construction, etc."
+                value={formik.values.purpose}
+                onChange={formik.handleChange}
+                error={formik.touched.purpose && Boolean(formik.errors.purpose)}
+                helperText={formik.touched.purpose && formik.errors.purpose}
               />
             </Grid>
 
