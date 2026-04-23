@@ -15,6 +15,8 @@ import api from "../utils/api";
 
 // ✅ Local images
 import WelcomeImage from "../assets/topimage.jpg";
+
+const HomePage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
