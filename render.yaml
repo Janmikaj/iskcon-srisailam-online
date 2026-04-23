@@ -1,6 +1,7 @@
 services:
   - type: web
-    name: iskcon
+    name: iskcon-srisailam
+
 
     env: node
     plan: free
