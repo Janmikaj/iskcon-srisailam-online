@@ -1,6 +1,7 @@
 services:
   - type: web
-    name: iskcon-fullstack
+    name: iskcon
+
     env: node
     plan: free
     buildCommand: npm run render-build
