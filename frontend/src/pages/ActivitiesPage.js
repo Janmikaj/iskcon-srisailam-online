@@ -19,7 +19,7 @@ import {
   CardMedia,
   TextField,
 } from '@mui/material';
-import { spiritualImages } from '../utils/images';
+import { getEventImage } from '../utils/images';
     
 import { DateCalendar, PickersDay } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -218,7 +218,7 @@ const ActivitiesPage = () => {
                       <CardMedia
                         component="img"
                         height="140"
-                        image={event.imageUrl || spiritualImages[index % spiritualImages.length]}
+                        image={event.imageUrl || getEventImage(event.title, index)}
                         alt={event.title}
                       />
                       <CardContent>
