@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import api from "../utils/api";
-import { getEventImage } from "../utils/images";
+import { getEventImage, handleImageError } from "../utils/images";
 
 // ✅ Local images
 import WelcomeImage from "../assets/topimage.jpg";
@@ -161,6 +161,7 @@ const HomePage = () => {
                     height="200"
                     image={event.imageUrl || getEventImage(event.title, index)}
                     alt={event.title}
+                    onError={(e) => handleImageError(e, event.title, index)}
                   />
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography

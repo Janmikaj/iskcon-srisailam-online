@@ -19,7 +19,7 @@ import {
   CardMedia,
   TextField,
 } from '@mui/material';
-import { getEventImage } from '../utils/images';
+import { getEventImage, handleImageError } from '../utils/images';
     
 import { DateCalendar, PickersDay } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -220,6 +220,7 @@ const ActivitiesPage = () => {
                         height="140"
                         image={event.imageUrl || getEventImage(event.title, index)}
                         alt={event.title}
+                        onError={(e) => handleImageError(e, event.title, index)}
                       />
                       <CardContent>
                         <Typography
